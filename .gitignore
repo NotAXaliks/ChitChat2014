@@ -1,0 +1,168 @@
+# Prerequisites
+*.d
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Linker output
+*.ilk
+*.map
+*.exp
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Kernel Module Compile Results
+*.mod*
+*.cmd
+.tmp_versions/
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
+
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# -------------------------------
+# Rider / JetBrains
+# -------------------------------
+.idea/
+*.sln.iml
+
+# Rider logs
+.idea/.idea.*
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/dictionaries
+.idea/**/shelf/
+
+# User-specific files
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+
+# -------------------------------
+# Build results
+# -------------------------------
+bin/
+obj/
+out/
+[Aa]rtifacts/
+[Bb]uild/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+*.exe
+*.dll
+*.pdb
+*.cache
+*.log
+
+# -------------------------------
+# ASP.NET Core
+# -------------------------------
+# IIS Express settings
+.vs/
+.vscode/
+.vsconfig
+appsettings.*.json.user
+launchSettings.json
+
+# User secrets
+secrets.json
+
+# -------------------------------
+# NuGet
+# -------------------------------
+*.nupkg
+*.snupkg
+packages/
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.fragment.lock.json
+
+# -------------------------------
+# Logs / Temp files
+# -------------------------------
+*.log
+logs/
+*.tmp
+*.temp
+*.bak
+*.swp
+
+# -------------------------------
+# OS-specific files
+# -------------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# -------------------------------
+# Rider caches
+# -------------------------------
+.idea/.idea/
+.idea/modules.xml
+.idea/.name
+.idea/httpRequests/
+.idea/caches/
+.idea/libraries/
+
+# -------------------------------
+# Other
+# -------------------------------
+wwwroot/lib/
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+
+# End of file

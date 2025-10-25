@@ -11,7 +11,8 @@ public partial class ChatMembers
     public int Employee_Id { get; set; }
 
     [ForeignKey(nameof(Chatroom_Id))]
-    public virtual required Chatroom Chatroom { get; set; }
+    public virtual Chatroom? Chatroom { get; set; }
+
     [ForeignKey(nameof(Employee_Id))]
-    public virtual required Employee Employee { get; set; }
+    public virtual Employee? Employee { get; set; }
 }

@@ -1,0 +1,67 @@
+using System.ComponentModel.DataAnnotations;
+using ChitChatApi.Context;
+using ChitChatApi.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+namespace ChitChatApi.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class EmployeeController : ControllerBase
+    {
+        private readonly AppDbContext _context;
+
+        public EmployeeController(AppDbContext context)
+        {
+            _context = context;
+        }
+
+        // api/employee/register
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] EmployeeDto dto)
+        {
+            /* Валидация */
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (dto.Department_Id <= 0) return BadRequest("Department_Id is required");
+            /* Конец валидации */
+
+            if (await _context.Employees.AnyAsync(e => e.Username == dto.Username))
+                return BadRequest("Employee already exists");
+
+            var department = await _context.Departments.FindAsync(dto.Department_Id);
+            if (department == null) return BadRequest("Department is not found");
+
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+
+            var employee = new Employee
+            {
+                Name = dto.Name,
+                Department_Id = dto.Department_Id,
+                Username = dto.Username,
+                Password = hashedPassword,
+            };
+
+            await _context.Employees.AddAsync(employee);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { employee.Id, employee.Username });
+        }
+    }
+}
+
+public class EmployeeDto
+{
+    [Required(ErrorMessage = "Employee Name is required")]
+    [MaxLength(100, ErrorMessage = "Max Employee Name length is 100")]
+    public required string Name { get; set; }
+
+    public int Department_Id { get; set; }
+
+    [Required(ErrorMessage = "Employee Username is required")]
+    [MaxLength(32, ErrorMessage = "Max Employee Username length is 32")]
+    public required string Username { get; set; }
+    
+    [Required(ErrorMessage = "Employee Password is required")]
+    public required string Password { get; set; }
+}

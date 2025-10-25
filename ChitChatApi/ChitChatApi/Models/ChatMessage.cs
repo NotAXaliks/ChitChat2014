@@ -18,7 +18,7 @@ public partial class ChatMessage
     public required string Message { get; set; }
 
     [ForeignKey(nameof(Sender_Id))]
-    public virtual required Employee Employee { get; set; }
+    public virtual Employee? Employee { get; set; }
     [ForeignKey(nameof(Chatroom_Id))]
-    public virtual required Chatroom Chat { get; set; }
+    public virtual Chatroom? Chat { get; set; }
 }

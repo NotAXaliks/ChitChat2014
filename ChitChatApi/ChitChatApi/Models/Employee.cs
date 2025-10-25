@@ -16,7 +16,7 @@ public partial class Employee
     public int Department_Id { get; set; }
 
     [ForeignKey(nameof(Department_Id))]
-    public virtual required Department Department { get; set; }
+    public virtual Department? Department { get; set; }
 
     public required string Username { get; set; }
 

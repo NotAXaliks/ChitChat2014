@@ -25,6 +25,22 @@ if (app.Environment.IsDevelopment())
 {
 }
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    // Временная миграция паролей
+    var users = db.Employees.ToList();
+    foreach (var u in users)
+    {
+        if (!u.Password.StartsWith("$2"))
+            u.Password = BCrypt.Net.BCrypt.HashPassword(u.Password);
+    }
+    db.SaveChanges();
+
+    Console.WriteLine("Хэширование паролей завершено.");
+}
+
 app.UseHttpsRedirection();
 app.UseCors("AllowFrontendDev");
 app.UseRouting();

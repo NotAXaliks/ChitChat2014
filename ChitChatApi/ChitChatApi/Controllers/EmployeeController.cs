@@ -1,13 +1,9 @@
 using System.ComponentModel.DataAnnotations;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using ChitChatApi.Context;
 using ChitChatApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 namespace ChitChatApi.Controllers
 {
@@ -16,12 +12,10 @@ namespace ChitChatApi.Controllers
     public class EmployeeController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private readonly IConfiguration _configuration;
 
-        public EmployeeController(AppDbContext context, IConfiguration configuration)
+        public EmployeeController(AppDbContext context)
         {
             _context = context;
-            _configuration = configuration;
         }
 
         // api/employee/register
@@ -52,7 +46,9 @@ namespace ChitChatApi.Controllers
             await _context.Employees.AddAsync(employee);
             await _context.SaveChangesAsync();
 
-            return Ok(new { employee.Id, employee.Username });
+            var sessionToken = GenerateSession(employee.Id);
+
+            return Ok(new { employee.Id, employee.Username, employee.Name, sessionToken });
         }
 
         // api/employee/login
@@ -69,45 +65,32 @@ namespace ChitChatApi.Controllers
             if (!BCrypt.Net.BCrypt.Verify(dto.Password, employee.Password))
                 return BadRequest("Invalid password");
 
-            var token = GenerateJwtToken(employee);
+            var sessionToken = GenerateSession(employee.Id);
 
-            return Ok(new { token });
+            return Ok(new { employee.Id, employee.Username, employee.Name, sessionToken });
         }
 
-        [Authorize]
         [HttpGet("getMe")]
         public async Task<IActionResult> GetMe()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null) return Unauthorized();
 
-            var employee = await _context.Employees.FindAsync(int.Parse(userId));
+            var employee = await _context.Employees.FindAsync(userId);
             if (employee == null)
                 return NotFound();
 
             return Ok(employee);
         }
 
-        private string GenerateJwtToken(Employee employee)
+        public string GenerateSession(int employeeId)
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var sessionToken = Guid.NewGuid().ToString();
 
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, employee.Id.ToString()),   // userId
-                // new Claim(JwtRegisteredClaimNames.UniqueName, employee.Username), // username
-            };
+            HttpContext.Session.SetString("SessionToken", sessionToken);
+            HttpContext.Session.SetInt32("UserId", employeeId);
 
-            var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
-                claims: claims ?? [],
-                expires: DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["Jwt:ExpiresInMinutes"])),
-                signingCredentials: creds
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return sessionToken;
         }
     }
 }

@@ -1,0 +1,69 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        x:Class="ChitChatDesktop.Windows.LoginWindow"
+        WindowStartupLocation="CenterScreen"
+        mc:Ignorable="d" SizeToContent="WidthAndHeight"
+        d:HorizontalAlignment="Center" d:VerticalAlignment="Center"
+        Title="Login">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="15,5,15,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" Text="Username" FontSize="15" VerticalAlignment="Center"
+                       HorizontalAlignment="Left" />
+            <TextBox Grid.Column="1" Width="150" Watermark="Enter username" VerticalAlignment="Center"
+                     HorizontalAlignment="Right" BorderThickness="3" TextWrapping="WrapWithOverflow"
+                     ScrollViewer.HorizontalScrollBarVisibility="Hidden" />
+        </Grid>
+
+        <Grid Grid.Row="1" Margin="15,10,15,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" Text="Password" FontSize="15" VerticalAlignment="Center"
+                       HorizontalAlignment="Left" />
+            <TextBox Grid.Column="1" Width="150" Watermark="Enter password" FontSize="15" PasswordChar="•"
+                     VerticalAlignment="Center" HorizontalAlignment="Right" BorderThickness="3"
+                     TextWrapping="WrapWithOverflow"
+                     ScrollViewer.HorizontalScrollBarVisibility="Hidden" />
+        </Grid>
+
+        <Grid Grid.Row="2" Margin="15,15,15,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <CheckBox Grid.Column="1" VerticalAlignment="Center" BorderThickness="3" Content="Remember me"
+                      FontSize="15" />
+        </Grid>
+
+        <Grid Grid.Row="3" Margin="0,15,0,0" Height="40">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" Content="Ok" Width="130" CornerRadius="4" HorizontalContentAlignment="Center"
+                    HorizontalAlignment="Left" Margin="0 0 7 0" />
+            <Button Grid.Column="1" Content="Cancel" Width="130" CornerRadius="4" HorizontalContentAlignment="Center"
+                    HorizontalAlignment="Right" Margin="7 0 0 0" />
+        </Grid>
+    </Grid>
+
+</Window>

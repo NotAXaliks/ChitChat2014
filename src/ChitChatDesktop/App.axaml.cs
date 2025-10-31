@@ -1,12 +1,13 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using ChitChatDesktop.Windows;
 
 namespace ChitChatDesktop;
 
 public partial class App : Application
 {
+    public static LoginWindow? loginWindow;
+    
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);

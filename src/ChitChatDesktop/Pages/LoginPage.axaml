@@ -71,9 +71,9 @@
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="0" Content="Ok" Click="BOk_OnClick" Width="150" CornerRadius="5"
+            <Button Grid.Column="0" Content="Ok" Click="OnOkClick" Width="150" CornerRadius="5" HotKey="Enter"
                     HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="0 0 10 0" />
-            <Button Grid.Column="1" Content="Cancel" Click="BCancel_OnClick" Width="150" CornerRadius="5"
+            <Button Grid.Column="1" Content="Cancel" Click="OnCancelClick" Width="150" CornerRadius="5"
                     HorizontalContentAlignment="Center" HorizontalAlignment="Right" Margin="10 0 0 0" />
         </Grid>
     </Grid>

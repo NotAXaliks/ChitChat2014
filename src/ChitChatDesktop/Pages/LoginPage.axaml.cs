@@ -1,19 +1,25 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using ChitChatDesktop.Services;
+using MsBox.Avalonia;
 
 namespace ChitChatDesktop.Pages;
 
 public class LoginPageData : INotifyPropertyChanged
 {
+    private static readonly Regex UsernameRegex = new(@"^[a-zA-Z0-9_]+$", RegexOptions.Compiled);
+
     private string _username = "";
     private string _password = "";
     private bool _remember;
     private string _usernameError = "";
     private string _passwordError = "";
+    private string _loginError = "";
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -69,6 +75,16 @@ public class LoginPageData : INotifyPropertyChanged
         }
     }
 
+    public string LoginError
+    {
+        get => _loginError;
+        set
+        {
+            _loginError = value;
+            OnPropertyChanged();
+        }
+    }
+
     public bool HasErrors => !string.IsNullOrEmpty(UsernameError) || !string.IsNullOrEmpty(PasswordError);
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
@@ -94,7 +110,7 @@ public class LoginPageData : INotifyPropertyChanged
                 return;
         }
 
-        if (!Regex.IsMatch(Username, @"^[a-zA-Z0-9_]+$"))
+        if (!UsernameRegex.IsMatch(Username))
         {
             UsernameError = "Can only contain a-Z A-Z 0-9 _";
             return;
@@ -136,21 +152,36 @@ public partial class LoginPage : UserControl
         DataContext = _loginData;
     }
 
-    private void BOk_OnClick(object? sender, RoutedEventArgs e)
+    private async void OnOkClick(object? sender, RoutedEventArgs e)
     {
-        _loginData.ValidateUsername();
-        _loginData.ValidatePassword();
-
-        if (_loginData.HasErrors)
+        try
         {
-            return;
-        }
+            _loginData.ValidateUsername();
+            _loginData.ValidatePassword();
 
-        _loginData.UsernameError = "Invalid Username";
-        Console.WriteLine(new { _loginData.Username, _loginData.Password, _loginData.Remember });
+            if (_loginData.HasErrors) return;
+
+            var employeeOrError = await EmployeeApi.Login(_loginData.Username, _loginData.Password);
+
+            if (!string.IsNullOrEmpty(employeeOrError.Error))
+            {
+                await MessageBoxManager.GetMessageBoxStandard("Error", employeeOrError.Error).ShowAsync();
+                return;
+            }
+
+            // TODO Сделать Remember me
+        
+            App.loginWindow?.Close();
+        
+            // TODO Открываем основное окно. Т.е. чат
+        }
+        catch (Exception exception)
+        {
+            await MessageBoxManager.GetMessageBoxStandard("Error", $"Something went wrong. {exception.Message ?? ""}").ShowAsync();
+        }
     }
 
-    private void BCancel_OnClick(object? sender, RoutedEventArgs e)
+    private void OnCancelClick(object? sender, RoutedEventArgs e)
     {
         App.loginWindow?.Close();
     }

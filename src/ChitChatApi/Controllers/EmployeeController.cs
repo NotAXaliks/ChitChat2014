@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using ChitChatApi.Context;
 using ChitChatApi.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -11,6 +12,11 @@ namespace ChitChatApi.Controllers
     [ApiController]
     public class EmployeeController : ControllerBase
     {
+        public IActionResult SendError(string error)
+        {
+            return Ok(new { Error = error });
+        }
+
         private readonly AppDbContext _context;
 
         public EmployeeController(AppDbContext context)
@@ -23,15 +29,15 @@ namespace ChitChatApi.Controllers
         public async Task<IActionResult> Register([FromBody] EmployeeRegisterDto dto)
         {
             /* Валидация */
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (dto.Department_Id <= 0) return BadRequest("Department_Id is required");
+            if (!ModelState.IsValid) return SendError("Invalid validation");
+            if (dto.Department_Id <= 0) return SendError("Department_Id is required");
             /* Конец валидации */
 
             if (await _context.Employees.AnyAsync(e => e.Username == dto.Username))
-                return BadRequest("Employee already exists");
+                return SendError("Employee already exists");
 
             var department = await _context.Departments.FindAsync(dto.Department_Id);
-            if (department == null) return BadRequest("Department is not found");
+            if (department == null) return SendError("Department is not found");
 
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
@@ -56,14 +62,14 @@ namespace ChitChatApi.Controllers
         public async Task<IActionResult> Login([FromBody] EmployeeLoginDto dto)
         {
             /* Валидация */
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid) return SendError("Invalid validation");
             /* Конец валидации */
 
-            var employee = await _context.Employees.SingleAsync(e => e.Username == dto.Username);
-            if (employee == null) return BadRequest("Employee not found");
+            var employee = await _context.Employees.FirstOrDefaultAsync(e => e.Username == dto.Username);
+            if (employee == null) return SendError("Employee not found");
 
             if (!BCrypt.Net.BCrypt.Verify(dto.Password, employee.Password))
-                return BadRequest("Invalid password");
+                return SendError("Invalid password");
 
             var sessionToken = GenerateSession(employee.Id);
 
@@ -78,7 +84,7 @@ namespace ChitChatApi.Controllers
 
             var employee = await _context.Employees.FindAsync(userId);
             if (employee == null)
-                return NotFound();
+                return SendError("Employee is not found");
 
             return Ok(employee);
         }

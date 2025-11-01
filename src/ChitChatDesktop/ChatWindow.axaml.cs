@@ -3,11 +3,11 @@ using ChitChatDesktop.Pages;
 
 namespace ChitChatDesktop;
 
-public partial class LoginWindow : Window
+public partial class ChatWindow : Window
 {
-    public LoginWindow()
+    public ChatWindow()
     {
         InitializeComponent();
-        LoginFrame.Content = new LoginPage();
+        ChatFrame.Content = new ChatPage();
     }
 }

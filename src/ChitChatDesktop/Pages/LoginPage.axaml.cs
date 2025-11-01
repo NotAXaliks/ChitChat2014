@@ -1,9 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Text.Json;
 using System.Text.RegularExpressions;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Interactivity;
 using ChitChatDesktop.Services;
 using MsBox.Avalonia;
@@ -144,6 +145,7 @@ public class LoginPageData : INotifyPropertyChanged
 
 public partial class LoginPage : UserControl
 {
+    private readonly Window _loginWindow;
     private readonly LoginPageData _loginData = new LoginPageData { Username = "", Password = "", Remember = false };
 
     public LoginPage()
@@ -161,28 +163,44 @@ public partial class LoginPage : UserControl
 
             if (_loginData.HasErrors) return;
 
-            var employeeOrError = await EmployeeApi.Login(_loginData.Username, _loginData.Password);
+            var employeeResponse = await EmployeeApi.Login(_loginData.Username, _loginData.Password);
 
-            if (!string.IsNullOrEmpty(employeeOrError.Error))
+            if (!string.IsNullOrEmpty(employeeResponse.Error))
             {
-                await MessageBoxManager.GetMessageBoxStandard("Error", employeeOrError.Error).ShowAsync();
+                await MessageBoxManager.GetMessageBoxStandard("Error", employeeResponse.Error).ShowAsync();
+                return;
+            }
+
+            if (!employeeResponse.IsSuccess)
+            {
+                await MessageBoxManager.GetMessageBoxStandard("Error", "Something went wrong.").ShowAsync();
                 return;
             }
 
             // TODO Сделать Remember me
-        
-            App.loginWindow?.Close();
-        
-            // TODO Открываем основное окно. Т.е. чат
+
+            var currentWindow = VisualRoot as Window;
+            currentWindow?.Hide();
+            
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                var chatWindow = new ChatWindow();
+                desktop.MainWindow = chatWindow;
+                chatWindow.Show();
+                
+                currentWindow?.Close();
+            }
         }
         catch (Exception exception)
         {
-            await MessageBoxManager.GetMessageBoxStandard("Error", $"Something went wrong. {exception.Message ?? ""}").ShowAsync();
+            Console.WriteLine(exception);
+            await MessageBoxManager.GetMessageBoxStandard("Error", $"Something went wrong. {exception.Message ?? ""}")
+                .ShowAsync();
         }
     }
 
     private void OnCancelClick(object? sender, RoutedEventArgs e)
     {
-        App.loginWindow?.Close();
+        (VisualRoot as Window)?.Close();
     }
 }

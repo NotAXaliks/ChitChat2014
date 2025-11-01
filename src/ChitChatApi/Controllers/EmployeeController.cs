@@ -1,22 +1,15 @@
-using System.ComponentModel.DataAnnotations;
-using System.Text.Json;
 using ChitChatApi.Context;
+using ChitChatApi.Dtos;
 using ChitChatApi.Models;
-using Microsoft.AspNetCore.Authorization;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChitChatApi.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
-    public class EmployeeController : ControllerBase
+    public class EmployeeController : BaseController
     {
-        public IActionResult SendError(string error)
-        {
-            return Ok(new { Error = error });
-        }
-
         private readonly AppDbContext _context;
 
         public EmployeeController(AppDbContext context)
@@ -54,7 +47,13 @@ namespace ChitChatApi.Controllers
 
             var sessionToken = GenerateSession(employee.Id);
 
-            return Ok(new { employee.Id, employee.Username, employee.Name, sessionToken });
+            return SendData(new
+            {
+                employee = new EmployeeWithDepartmentDto(employee.Id, employee.Name, employee.Username,
+                    new DepartmentDto(department.Id, department.Name)),
+                sessionToken,
+            });
+            
         }
 
         // api/employee/login
@@ -73,56 +72,24 @@ namespace ChitChatApi.Controllers
 
             var sessionToken = GenerateSession(employee.Id);
 
-            return Ok(new { employee.Id, employee.Username, employee.Name, sessionToken });
+            return SendData(new
+            {
+                Employee = new EmployeeDto(employee.Id, employee.Name, employee.Username, employee.Department_Id),
+                SessionToken = sessionToken,
+            });
         }
 
         [HttpGet("getMe")]
         public async Task<IActionResult> GetMe()
         {
             var userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null) return Unauthorized();
+            if (userId == null) return SendError("Unauthorized");
 
             var employee = await _context.Employees.FindAsync(userId);
             if (employee == null)
                 return SendError("Employee is not found");
 
-            return Ok(employee);
-        }
-
-        public string GenerateSession(int employeeId)
-        {
-            var sessionToken = Guid.NewGuid().ToString();
-
-            HttpContext.Session.SetString("SessionToken", sessionToken);
-            HttpContext.Session.SetInt32("UserId", employeeId);
-
-            return sessionToken;
+            return SendData(new EmployeeDto(employee.Id, employee.Name, employee.Username, employee.Department_Id));
         }
     }
-}
-
-public class EmployeeRegisterDto
-{
-    [Required(ErrorMessage = "Employee Name is required")]
-    [MaxLength(100, ErrorMessage = "Max Employee Name length is 100")]
-    public required string Name { get; set; }
-
-    public int Department_Id { get; set; }
-
-    [Required(ErrorMessage = "Employee Username is required")]
-    [MaxLength(32, ErrorMessage = "Max Employee Username length is 32")]
-    public required string Username { get; set; }
-
-    [Required(ErrorMessage = "Employee Password is required")]
-    public required string Password { get; set; }
-}
-
-public class EmployeeLoginDto
-{
-    [Required(ErrorMessage = "Employee Username is required")]
-    [MaxLength(32, ErrorMessage = "Max Employee Username length is 32")]
-    public required string Username { get; set; }
-
-    [Required(ErrorMessage = "Employee Password is required")]
-    public required string Password { get; set; }
 }

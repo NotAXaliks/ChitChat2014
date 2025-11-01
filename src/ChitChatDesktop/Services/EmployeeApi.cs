@@ -2,49 +2,36 @@
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using ChitChatDesktop.Dtos;
 
 namespace ChitChatDesktop.Services;
 
 public class EmployeeApi
 {
-    public class LoginRequest
+    public static async Task<ApiResponse<LoginDataDto>> Login(string username, string password)
     {
-        public string Username { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-    }
-
-    public class LoginResponse
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string SessionId { get; set; } = string.Empty;
-        public string? Error { get; set; }
-    }
-    
-    public static async Task<LoginResponse> Login(string username, string password)
-    {
-        var data = new LoginRequest { Username = username, Password = password };
+        var data = new EmployeeLoginDto(username, password);
 
         try
         {
             var response = await NetManager.Post("employee/login", data);
             
-            if (!response.IsSuccessStatusCode) return new LoginResponse { Error = response.Content.ToString() };
+            if (!response.IsSuccessStatusCode) return new ApiResponse<LoginDataDto>(null, response.Content.ToString());
 
-            var result = await NetManager.ParseResponse<LoginResponse>(response);
+            var result = await NetManager.ParseResponse<ApiResponse<LoginDataDto>>(response);
             return result;
         }
         catch (HttpRequestException e)
         {
-            return new LoginResponse { Error = $"Сетевая ошибка: {e.Message}" };
+            return new ApiResponse<LoginDataDto>(null, $"Сетевая ошибка: {e.Message}");
         }
         catch (JsonException e)
         {
-            return new LoginResponse { Error = $"Ошибка разбора JSON: {e.Message}" };
+            return new ApiResponse<LoginDataDto>(null, $"Ошибка разбора JSON: {e.Message}");
         }
         catch (Exception e)
         {
-            return new LoginResponse { Error = $"Неизвестная ошибка: {e.Message}" };
+            return new ApiResponse<LoginDataDto>(null, $"Неизвестная ошибка: {e.Message}");
         }
     }
 }

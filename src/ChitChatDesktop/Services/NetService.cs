@@ -8,7 +8,7 @@ namespace ChitChatDesktop.Services;
 
 public static class NetManager
     {
-        private const string Url = "http://localhost:5165/api/";
+        private const string Url = "http://localhost:40002/api/";
         private static readonly HttpClient HttpClient = new();
 
         public static async Task<T> Get<T>(string path)

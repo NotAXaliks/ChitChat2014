@@ -1,13 +1,13 @@
-﻿<Window xmlns="https://github.com/avaloniaui"
+<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        x:Class="ChitChatDesktop.LoginWindow"
+        x:Class="ChitChatDesktop.MainWindow"
         WindowStartupLocation="CenterScreen"
-        mc:Ignorable="d" SizeToContent="WidthAndHeight" MinWidth="350" MinHeight="250"
+        mc:Ignorable="d" SizeToContent="Height" Width="500" MinWidth="350" MinHeight="300"
         d:HorizontalAlignment="Center" d:VerticalAlignment="Center"
-        Title="Login">
-
-    <UserControl Name="LoginFrame"></UserControl>
-
+        Title="Chitchat">
+    
+        <UserControl Name="MainFrame"></UserControl>
+        
 </Window>

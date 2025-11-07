@@ -145,7 +145,6 @@ public class LoginPageData : INotifyPropertyChanged
 
 public partial class LoginPage : UserControl
 {
-    private readonly Window _loginWindow;
     private readonly LoginPageData _loginData = new LoginPageData { Username = "", Password = "", Remember = false };
 
     public LoginPage()
@@ -184,9 +183,9 @@ public partial class LoginPage : UserControl
             
             if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                var chatWindow = new ChatWindow();
-                desktop.MainWindow = chatWindow;
-                chatWindow.Show();
+                var mainWindow = new MainWindow();
+                desktop.MainWindow = mainWindow;
+                mainWindow.Show();
                 
                 currentWindow?.Close();
             }

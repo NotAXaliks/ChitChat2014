@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -12,26 +13,30 @@ public class EmployeeApi
     {
         var data = new EmployeeLoginDto(username, password);
 
-        try
-        {
-            var response = await NetManager.Post("employee/login", data);
-            
-            if (!response.IsSuccessStatusCode) return new ApiResponse<LoginDataDto>(null, response.Content.ToString());
+        var result = await NetManager.Post<LoginDataDto>("employee/login", data);
 
-            var result = await NetManager.ParseResponse<ApiResponse<LoginDataDto>>(response);
-            return result;
-        }
-        catch (HttpRequestException e)
+        if (result.Data != null)
         {
-            return new ApiResponse<LoginDataDto>(null, $"Сетевая ошибка: {e.Message}");
+            NetManager.Cache.Set("me", result.Data.Employee, DateTimeOffset.Now.AddMinutes(20));
         }
-        catch (JsonException e)
+
+        return result;
+    }
+
+    public static async Task<ApiResponse<EmployeeDto>> GetMe()
+    {
+        if (NetManager.Cache.Contains("me"))
         {
-            return new ApiResponse<LoginDataDto>(null, $"Ошибка разбора JSON: {e.Message}");
+            return new ApiResponse<EmployeeDto>((EmployeeDto)NetManager.Cache.Get("me")!);
         }
-        catch (Exception e)
+
+        var result = await NetManager.Get<EmployeeDto>("employee/getMe");
+
+        if (result.Data != null)
         {
-            return new ApiResponse<LoginDataDto>(null, $"Неизвестная ошибка: {e.Message}");
+            NetManager.Cache.Set("me", result.Data, DateTimeOffset.Now.AddMinutes(20));
         }
+
+        return result;
     }
 }

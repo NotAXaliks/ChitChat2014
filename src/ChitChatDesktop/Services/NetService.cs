@@ -1,48 +1,81 @@
 using System;
 using System.Net.Http;
+using System.Runtime.Caching;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using ChitChatDesktop.Dtos;
 
 namespace ChitChatDesktop.Services;
 
 public static class NetManager
-    {
-        private const string Url = "http://localhost:40002/api/";
-        private static readonly HttpClient HttpClient = new();
+{
+    private const string Url = "http://localhost:40002/api/";
+    private static readonly HttpClient HttpClient = new();
+    public static readonly MemoryCache Cache = MemoryCache.Default;
 
-        public static async Task<T> Get<T>(string path)
+    public static async Task<ApiResponse<T>> Get<T>(string path)
+    {
+        try
         {
             var response = await HttpClient.GetAsync(Url + path);
-            var content = await response.Content.ReadAsStringAsync();
-            var data = JsonSerializer.Deserialize<T>(content);
-            return data!;
-        }
 
-        public static async Task<HttpResponseMessage> Post<T>(string path, T data)
+            return await GetResponse<T>(response);
+        }
+        catch (HttpRequestException e)
+        {
+            return new ApiResponse<T>(default, $"Request Error: {e.Message}");
+        }
+        catch (Exception e)
+        {
+            return new ApiResponse<T>(default, $"Unknown error: {e.Message}");
+        }
+    }
+    
+    public static async Task<ApiResponse<T>> Post<T>(string path, object data)
+    {
+        try
         {
             var jsData = JsonSerializer.Serialize(data);
             var response = await HttpClient.PostAsync(Url + path, new StringContent(jsData, Encoding.UTF8, "application/json"));
-            return response;
-        }
-        public static async Task<HttpResponseMessage> Put<T>(string path, T data)
-        {
-            var jsData = JsonSerializer.Serialize(data);
-            var response = await HttpClient.PutAsync(Url + path, new StringContent(jsData, Encoding.UTF8, "application/json"));
-            return response;
-        }
 
-        public static async Task<HttpResponseMessage> Delete(string path)
-        {
-            var response = await HttpClient.DeleteAsync(Url + path);
-            return response;
+            return await GetResponse<T>(response);
         }
-
-        public static async Task<T> ParseResponse<T>(HttpResponseMessage responseMessage)
+        catch (HttpRequestException e)
         {
-            var content = await responseMessage.Content.ReadAsStringAsync();
-            var data = JsonSerializer.Deserialize<T>(content);
-            return data!;
+            return new ApiResponse<T>(default, $"Request Error: {e.Message}");
         }
-        
+        catch (Exception e)
+        {
+            return new ApiResponse<T>(default, $"Unknown error: {e.Message}");
+        }
     }
+
+    private static async Task<ApiResponse<T>> GetResponse<T>(HttpResponseMessage response)
+    {
+        if (!response.IsSuccessStatusCode) return new ApiResponse<T>(default, response.Content.ToString());
+
+        var content = string.Empty;
+        try
+        {
+            content = await response.Content.ReadAsStringAsync();
+
+            return JsonSerializer.Deserialize<ApiResponse<T>>(content)!;
+        }
+        catch (JsonException e)
+        {
+            return new ApiResponse<T>(default, $"Invalid Response: {content}");
+        }
+        catch (Exception e)
+        {
+            return new ApiResponse<T>(default, $"Unknown error: {e.Message}");
+        }
+    }
+
+    public static async Task<T> ParseResponse<T>(HttpResponseMessage responseMessage)
+    {
+        var content = await responseMessage.Content.ReadAsStringAsync();
+        var data = JsonSerializer.Deserialize<T>(content);
+        return data!;
+    }
+}

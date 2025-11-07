@@ -4,33 +4,33 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              x:Class="ChitChatDesktop.Pages.MainPage">
-    <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="10">
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="20">
 
-        <TextBlock Grid.Row="0" Name="HelloText" Text="{Binding HelloText}" FontSize="24" FontWeight="Bold" HorizontalAlignment="Left"/>
+        <TextBlock Grid.Row="0" Name="HelloText" Text="{Binding HelloText}" FontSize="24" FontWeight="Bold"
+                   HorizontalAlignment="Left" />
 
-        <TextBlock Grid.Row="1" Text="Your open chatrooms" FontSize="18" Margin="0,20,0,10" HorizontalAlignment="Left"/>
+        <TextBlock Grid.Row="1" Text="Your open chatrooms" FontSize="18" Margin="0,20,0,10" HorizontalAlignment="Left" />
 
-        <DataGrid Grid.Row="2" ItemsSource="{Binding ChatList}" 
+        <DataGrid Grid.Row="2" ItemsSource="{Binding ChatList}"
                   AutoGenerateColumns="False"
-                  IsReadOnly="True" 
+                  IsReadOnly="True"
                   CanUserResizeColumns="True"
                   HeadersVisibility="Column"
                   Height="160"
                   HorizontalAlignment="Stretch">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Topic" Binding="{Binding Topic}" Width="5*" MinWidth="200"/>
-                <DataGridTextColumn Header="Last message" Binding="{Binding LastMessage}" Width="*" MinWidth="130"/>
+                <DataGridTextColumn Header="Topic" Binding="{Binding Topic}" Width="5*" MinWidth="200" />
+                <DataGridTextColumn Header="Last message" Binding="{Binding LastMessage}" Width="*" MinWidth="130" />
             </DataGrid.Columns>
         </DataGrid>
 
-        <Grid Grid.Row="3" Margin="0,15,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-            
-            <Button Grid.Column="0" Content="Employee Finder" Width="150" Height="40" HorizontalContentAlignment="Center" CornerRadius="5" VerticalContentAlignment="Center" HorizontalAlignment="Left"/>
-            <Button Grid.Column="1" Content="Close Application" Width="150" Height="40" HorizontalContentAlignment="Center" CornerRadius="5" VerticalContentAlignment="Center" HorizontalAlignment="Right"/>
+        <Grid Grid.Row="3" Margin="0,15,0,0" ColumnDefinitions="*,*">
+            <Button Grid.Column="0" Content="Employee Finder" Width="150" Height="40"
+                    HorizontalContentAlignment="Center" CornerRadius="5" VerticalContentAlignment="Center"
+                    HorizontalAlignment="Left" Click="OnEmployeeFinderClick" />
+            <Button Grid.Column="1" Content="Close Application" Width="150" Height="40"
+                    HorizontalContentAlignment="Center" CornerRadius="5" VerticalContentAlignment="Center"
+                    HorizontalAlignment="Right" Click="OnCloseClick" />
         </Grid>
     </Grid>
 </UserControl>

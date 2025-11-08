@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -8,7 +9,7 @@ namespace ChitChatDesktop.Pages;
 
 public partial class MainPage : UserControl
 {
-    public ObservableCollection<Chatroom> ChatList { get; set; } = [];
+    private ObservableCollection<Chatroom> ChatList { get; set; } = [];
 
     public MainPage()
     {
@@ -24,23 +25,33 @@ public partial class MainPage : UserControl
         var me = meResponse.Data;
         if (me == null)
         {
-            await MessageBoxManager.GetMessageBoxStandard("Error", "An error occurred while fetching the user.").ShowAsync();
+            await MessageBoxManager.GetMessageBoxStandard("Error", "An error occurred while fetching the user.")
+                .ShowAsync();
             return;
         }
-        
+
         HelloText.Text = $"Hello, {me.Name}!";
 
-        ChatList.Clear();
-        ChatList.Add(new Chatroom { Topic = "The roof is on firsfdgsdfgsdfgsdfgfsde", LastMessage = "24.11. 15:10" });
-        ChatList.Add(new Chatroom { Topic = "Sebastian", LastMessage = "15.11. 08:30" });
-        ChatList.Add(new Chatroom { Topic = "Lisa", LastMessage = "1.12. 10:30" });
-        ChatList.Add(new Chatroom { Topic = "IT Helpdesk", LastMessage = "1.8. 17:23" });
+        var openChatsResponse = await ChatApi.GetOpen();
+        var chats = openChatsResponse.Data;
+        if (chats == null) return;
+
+        foreach (var chat in chats)
+        {
+            ChatList.Add(new Chatroom
+            {
+                Topic = chat.Chatroom.Topic,
+                LastMessageDate = chat.LastMessageDate.HasValue
+                    ? DateTimeOffset.FromUnixTimeMilliseconds(chat.LastMessageDate.Value).ToString("MM.dd HH:mm")
+                    : "Empty chat"
+            });
+        }
     }
 
     public class Chatroom
     {
         public string Topic { get; set; }
-        public string LastMessage { get; set; }
+        public string LastMessageDate { get; set; }
     }
 
     private void OnEmployeeFinderClick(object? sender, RoutedEventArgs e)

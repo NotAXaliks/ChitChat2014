@@ -1,13 +1,17 @@
 ﻿using Avalonia.Controls;
+using ChitChatDesktop.Dtos;
 using ChitChatDesktop.Pages;
 
 namespace ChitChatDesktop;
 
 public partial class ChatWindow : Window
 {
-    public ChatWindow()
+    public ChatWindow(ChatroomDto chat, EmployeeDto[] employees)
     {
         InitializeComponent();
-        ChatFrame.Content = new ChatPage();
+        
+        Title = $"Topic: {chat.Topic}";
+        
+        ChatFrame.Content = new ChatPage(chat, employees);
     }
 }

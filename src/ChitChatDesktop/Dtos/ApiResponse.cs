@@ -12,3 +12,5 @@ public record LoginDataDto(
     EmployeeDto Employee,
     string SessionToken
 );
+
+public record GetChatroomDataDto(ChatroomDto Chatroom, EmployeeDto[] Members);

@@ -17,10 +17,11 @@
                   CanUserResizeColumns="True"
                   HeadersVisibility="Column"
                   Height="160"
-                  HorizontalAlignment="Stretch">
+                  HorizontalAlignment="Stretch"
+                  DoubleTapped="OnChatlistDoubleClick">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Topic" Binding="{Binding Topic}" Width="5*" MinWidth="200" />
-                <DataGridTextColumn Header="Last message" Binding="{Binding LastMessage}" Width="*" MinWidth="130" />
+                <DataGridTextColumn Header="Last message" Binding="{Binding LastMessageDate}" Width="*" MinWidth="130" />
             </DataGrid.Columns>
         </DataGrid>
 

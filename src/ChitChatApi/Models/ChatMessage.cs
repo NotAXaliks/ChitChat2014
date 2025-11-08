@@ -13,6 +13,7 @@ public partial class ChatMessage
 
     public int Chatroom_Id { get; set; }
 
+    [Column(TypeName = "timestamp")]
     public DateTime Date { get; set; }
 
     public required string Message { get; set; }

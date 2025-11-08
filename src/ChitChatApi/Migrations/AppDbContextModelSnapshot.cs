@@ -49,7 +49,9 @@ namespace ChitChatApi.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp with time zone");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp")
+                        .HasDefaultValueSql("now()");
 
                     b.Property<string>("Message")
                         .IsRequired()
@@ -60,9 +62,10 @@ namespace ChitChatApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Chatroom_Id");
-
                     b.HasIndex("Sender_Id");
+
+                    b.HasIndex("Chatroom_Id", "Id")
+                        .IsDescending(false, true);
 
                     b.ToTable("ChatMessages");
                 });

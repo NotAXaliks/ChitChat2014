@@ -7,15 +7,8 @@ using Microsoft.EntityFrameworkCore;
 namespace ChitChatApi.Controllers
 {
     [Route("api/[controller]")]
-    public class EmployeeController : BaseController
+    public class EmployeeController(AppDbContext database) : BaseController
     {
-        private readonly AppDbContext _context;
-
-        public EmployeeController(AppDbContext context)
-        {
-            _context = context;
-        }
-
         // api/employee/register
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] EmployeeRegisterRequestDto requestDto)
@@ -25,10 +18,10 @@ namespace ChitChatApi.Controllers
             if (requestDto.Department_Id <= 0) return SendError("Department_Id is required");
             /* Конец валидации */
 
-            if (await _context.Employees.AnyAsync(e => e.Username == requestDto.Username))
+            if (await database.Employees.AnyAsync(e => e.Username == requestDto.Username))
                 return SendError("Employee already exists");
 
-            var department = await _context.Departments.FindAsync(requestDto.Department_Id);
+            var department = await database.Departments.FindAsync(requestDto.Department_Id);
             if (department == null) return SendError("Department is not found");
 
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(requestDto.Password);
@@ -41,8 +34,8 @@ namespace ChitChatApi.Controllers
                 Password = hashedPassword,
             };
 
-            await _context.Employees.AddAsync(employee);
-            await _context.SaveChangesAsync();
+            await database.Employees.AddAsync(employee);
+            await database.SaveChangesAsync();
 
             var sessionToken = GenerateSession(employee.Id);
 
@@ -59,7 +52,7 @@ namespace ChitChatApi.Controllers
             if (!ModelState.IsValid) return SendError("Invalid validation");
             /* Конец валидации */
 
-            var employee = await _context.Employees.FirstOrDefaultAsync(e => e.Username == requestDto.Username);
+            var employee = await database.Employees.FirstOrDefaultAsync(e => e.Username == requestDto.Username);
             if (employee == null) return SendError("Employee not found");
 
             if (!BCrypt.Net.BCrypt.Verify(requestDto.Password, employee.Password))
@@ -70,13 +63,14 @@ namespace ChitChatApi.Controllers
             return SendData(new EmployeeLoginResponseDto(new EmployeeDto(employee.Id, employee.Name, employee.Username, employee.Department_Id), sessionToken));
         }
 
+        // api/employee/getMe
         [HttpGet("getMe")]
         public async Task<IActionResult> GetMe()
         {
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null) return SendError("Unauthorized");
 
-            var employee = await _context.Employees.FindAsync(userId);
+            var employee = await database.Employees.FindAsync(userId);
             if (employee == null)
                 return SendError("Employee is not found");
 

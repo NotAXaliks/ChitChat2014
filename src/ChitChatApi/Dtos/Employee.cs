@@ -47,3 +47,12 @@ public class EmployeeLoginRequestDto
     [Required(ErrorMessage = "Employee Password is required")]
     public required string Password { get; set; }
 }
+
+public class EmployeeSearchRequestDto
+{
+    [Required(ErrorMessage = "Department_Ids is required")]
+    public required int[] Department_Ids { get; set; }
+    
+    [MaxLength(100, ErrorMessage = "Max Query length is 100")]
+    public string? Query { get; set; }
+}

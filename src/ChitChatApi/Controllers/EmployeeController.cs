@@ -9,6 +9,7 @@ namespace ChitChatApi.Controllers
     [Route("api/[controller]")]
     public class EmployeeController(AppDbContext database) : BaseController
     {
+        // Зарегистрироваться
         // api/employee/register
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] EmployeeRegisterRequestDto requestDto)
@@ -44,6 +45,7 @@ namespace ChitChatApi.Controllers
                 new DepartmentDto(department.Id, department.Name)), sessionToken));
         }
 
+        // Войти в аккаунт
         // api/employee/login
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] EmployeeLoginRequestDto requestDto)
@@ -60,9 +62,11 @@ namespace ChitChatApi.Controllers
 
             var sessionToken = GenerateSession(employee.Id);
 
-            return SendData(new EmployeeLoginResponseDto(new EmployeeDto(employee.Id, employee.Name, employee.Username, employee.Department_Id), sessionToken));
+            return SendData(new EmployeeLoginResponseDto(
+                new EmployeeDto(employee.Id, employee.Name, employee.Username, employee.Department_Id), sessionToken));
         }
 
+        // Получить информацию о текущем работнике
         // api/employee/getMe
         [HttpGet("getMe")]
         public async Task<IActionResult> GetMe()
@@ -75,6 +79,38 @@ namespace ChitChatApi.Controllers
                 return SendError("Employee is not found");
 
             return SendData(new EmployeeDto(employee.Id, employee.Name, employee.Username, employee.Department_Id));
+        }
+
+        // Список департаментов
+        // api/employee/departments
+        [HttpGet("departments")]
+        public async Task<IActionResult> GetDepartments()
+        {
+            var departments = await database.Departments.ToListAsync();
+
+            return SendData(departments.Select(d => new DepartmentDto(d.Id, d.Name)));
+        }
+
+        // Искать работника
+        // api/employee/search
+        [HttpPost("search")]
+        public async Task<IActionResult> SearchEmployee([FromBody] EmployeeSearchRequestDto requestDto)
+        {
+            /* Валидация */
+            if (!ModelState.IsValid) return SendError("Invalid validation");
+            /* Конец валидации */
+
+            var query = database.Employees
+                .Where(e => requestDto.Department_Ids.Contains(e.Department_Id));
+
+            if (!string.IsNullOrWhiteSpace(requestDto.Query))
+            {
+                query = query.Where(e => EF.Functions.ILike(e.Name, $"%{requestDto.Query}%"));
+            }
+
+            var employees = await query.Take(50).ToListAsync();
+            
+            return SendData(employees.Select(e => new EmployeeDto(e.Id, e.Name, e.Username, e.Department_Id)));
         }
     }
 }

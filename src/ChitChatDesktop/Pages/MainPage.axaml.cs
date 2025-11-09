@@ -92,7 +92,10 @@ public partial class MainPage : UserControl
 
     private void OnEmployeeFinderClick(object? sender, RoutedEventArgs e)
     {
-        Refresh();
+        // TODO: Запретить создавать несколько окон. Хранить и затем переключаться на активное окно
+        var employeeFinderWindow = new EmployeeFinderWindow();
+        
+        employeeFinderWindow.Show();
     }
 
     private void OnCloseClick(object? sender, RoutedEventArgs e)

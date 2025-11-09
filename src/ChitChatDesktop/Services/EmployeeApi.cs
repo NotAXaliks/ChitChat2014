@@ -36,4 +36,29 @@ public class EmployeeApi
 
         return result;
     }
+    
+    public static async Task<ApiResponse<DepartmentDto[]>> GetDepartments()
+    {
+        if (NetManager.Cache.Contains("departments"))
+        {
+            return new ApiResponse<DepartmentDto[]>((DepartmentDto[])NetManager.Cache.Get("departments")!);
+        }
+
+        var result = await NetManager.Get<DepartmentDto[]>("employee/departments");
+
+        if (result.Data != null)
+        {
+            NetManager.Cache.Set("departments", result.Data, DateTimeOffset.Now.AddHours(1));
+        }
+
+        return result;
+    }
+    
+    public static async Task<ApiResponse<EmployeeDto[]>> SearchEmployees(int[] departmentIds, string? searchQuery)
+    {
+        var data = new EmployeeSearchDto(departmentIds, searchQuery);
+        var result = await NetManager.Post<EmployeeDto[]>("employee/search", data);
+
+        return result;
+    }
 }

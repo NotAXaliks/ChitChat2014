@@ -18,3 +18,5 @@ public record EmployeeWithDepartmentDto(
 public record EmployeeRegisterDto(string Username, string Password, string Name, int Department_Id);
 
 public record EmployeeLoginDto(string Username, string Password);
+
+public record EmployeeSearchDto(int[] Department_Ids, string? Query);

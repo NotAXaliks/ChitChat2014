@@ -1,0 +1,34 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ChitChatDesktop.Pages.EmployeeFinderPage">
+
+    <Grid ColumnDefinitions="*, 2*" Height="500" VerticalAlignment="Top">
+        <Grid Grid.Column="0" RowDefinitions="Auto, *" Margin="10">
+            <TextBlock Grid.Row="0" Text="Departments" FontSize="16" Margin="0,0,0,10" />
+            <ScrollViewer Grid.Row="1">
+                <ItemsControl x:Name="DepartmentsList">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}" Margin="0,0,0,5" Click="OnDepartmentCheck"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+
+        <Grid Grid.Column="1" Margin="10" RowDefinitions="Auto,*">
+            <TextBox Grid.Row="0" x:Name="SearchBox" Watermark="🔍 Search employee..." Margin="0,0,0,10" TextChanged="OnSearchInput"/>
+            <ListBox Grid.Row="1" x:Name="EmployeeList" SelectionMode="Single" BorderThickness="2">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
+    </Grid>
+
+</UserControl>

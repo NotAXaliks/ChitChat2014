@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         x:Class="ChitChatDesktop.ChatWindow"
         WindowStartupLocation="CenterScreen"
-        mc:Ignorable="d" SizeToContent="Height" Width="600" MinWidth="450" MinHeight="600"
+        mc:Ignorable="d" SizeToContent="Height" Width="600" MinWidth="450" MinHeight="500"
         d:HorizontalAlignment="Center" d:VerticalAlignment="Center">
 
     <UserControl Name="ChatFrame"></UserControl>

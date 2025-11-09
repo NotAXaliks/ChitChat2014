@@ -6,12 +6,15 @@ namespace ChitChatDesktop;
 
 public partial class ChatWindow : Window
 {
+    public ChatPage ChatPage { get; }
+    
     public ChatWindow(ChatroomDto chat, EmployeeDto[] employees)
     {
         InitializeComponent();
         
         Title = $"Topic: {chat.Topic}";
         
-        ChatFrame.Content = new ChatPage(chat, employees);
+        ChatPage = new ChatPage(chat, employees);
+        ChatFrame.Content = ChatPage;
     }
 }

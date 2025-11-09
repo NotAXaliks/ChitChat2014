@@ -50,6 +50,24 @@ public static class NetManager
             return new ApiResponse<T>(default, $"Unknown error: {e.Message}");
         }
     }
+    
+    public static async Task<ApiResponse<T>> Delete<T>(string path)
+    {
+        try
+        {
+            var response = await HttpClient.DeleteAsync(Url + path);
+
+            return await GetResponse<T>(response);
+        }
+        catch (HttpRequestException e)
+        {
+            return new ApiResponse<T>(default, $"Request Error: {e.Message}");
+        }
+        catch (Exception e)
+        {
+            return new ApiResponse<T>(default, $"Unknown error: {e.Message}");
+        }
+    }
 
     private static async Task<ApiResponse<T>> GetResponse<T>(HttpResponseMessage response)
     {
@@ -70,12 +88,5 @@ public static class NetManager
         {
             return new ApiResponse<T>(default, $"Unknown error: {e.Message}");
         }
-    }
-
-    public static async Task<T> ParseResponse<T>(HttpResponseMessage responseMessage)
-    {
-        var content = await responseMessage.Content.ReadAsStringAsync();
-        var data = JsonSerializer.Deserialize<T>(content);
-        return data!;
     }
 }

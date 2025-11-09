@@ -8,6 +8,7 @@ namespace ChitChatApi.Controllers
     [Route("api/[controller]")]
     public class ChatsController(AppDbContext database) : BaseController
     {
+        // Получить открытые чаты
         // api/chats/getOpen
         [HttpGet("getOpen")]
         public async Task<IActionResult> GetOpen()
@@ -32,15 +33,16 @@ namespace ChitChatApi.Controllers
                 ((DateTimeOffset?)data.LastMessageDate)?.ToUnixTimeMilliseconds())).ToArray());
         }
 
+        // Получить информацию о чате
         // api/chats/{ID}
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetChat(int id)
+        [HttpGet("{chatId:int}")]
+        public async Task<IActionResult> GetChat(int chatId)
         {
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null) return SendError("Unauthorized");
 
             var chatWithEmployees = await database.Chatrooms
-                .Where(c => c.Id == id && c.Members.Any(cm => cm.Employee_Id == userId))
+                .Where(c => c.Id == chatId && c.Members.Any(cm => cm.Employee_Id == userId))
                 .Select(c => new
                 {
                     Chatroom = c,
@@ -55,6 +57,36 @@ namespace ChitChatApi.Controllers
             var members = chatWithEmployees.Employees.Select(e => new EmployeeDto(e.Id, e.Name, e.Username, e.Department_Id)).ToArray();
 
             return SendData(new ChatroomResponseDto(new ChatroomDto(chatWithEmployees.Chatroom.Id, chatWithEmployees.Chatroom.Topic), members));
+        }
+        
+        // Выйти из чата
+        // api/chats/{CHAT_ID}/me
+        [HttpDelete("{chatId:int}/me")]
+        public async Task<IActionResult> LeaveChat(int chatId)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null) return SendError("Unauthorized");
+
+            var chatWithEmployees = await database.ChatMembers
+                .Where(c => c.Chatroom_Id == chatId && c.Employee_Id == userId)
+                .ExecuteDeleteAsync();
+            
+            return SendData(chatWithEmployees != 0);
+        }
+        
+        // Выгнать пользователя из чата
+        // api/chats/{chatId}/{employeeId}
+        [HttpDelete("{chatId:int}/{employeeId:int}")]
+        public async Task<IActionResult> LeaveChat(int chatId, int employeeId)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null) return SendError("Unauthorized");
+
+            var chatWithEmployees = await database.ChatMembers
+                .Where(c => c.Chatroom_Id == chatId && c.Employee_Id == employeeId)
+                .ExecuteDeleteAsync();
+            
+            return SendData(chatWithEmployees != 0);
         }
     }
 }

@@ -68,15 +68,18 @@ namespace ChitChatApi.Controllers
         {
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null) return SendError("Unauthorized");
-
+            
             await using var transaction = await database.Database.BeginTransactionAsync();
+            
+            var hasChat = await database.Chatrooms.AnyAsync(c => c.Id == chatId);
+            if (!hasChat) return SendData(false);
 
             var deletedCount = await database.ChatMembers
                 .Where(c => c.Chatroom_Id == chatId && c.Employee_Id == userId)
                 .ExecuteDeleteAsync();
 
             // Если никого не осталось в чате, удаляем чат
-            bool hasMembers = await database.ChatMembers
+            var hasMembers = await database.ChatMembers
                 .AnyAsync(c => c.Chatroom_Id == chatId);
             if (!hasMembers)
             {

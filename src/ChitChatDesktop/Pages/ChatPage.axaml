@@ -4,5 +4,49 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              x:Class="ChitChatDesktop.Pages.ChatPage">
-    Welcome to Avalonia!
+
+    <Grid RowDefinitions="Auto, *">
+        <!-- Список пользователей и область чата -->
+        <Grid Grid.Row="0" ColumnDefinitions="*, 2*" MaxHeight="500">
+            <!-- Список пользователей -->
+            <Grid Grid.Column="0" Margin="5" RowDefinitions="*, Auto, Auto, Auto">
+                <ListBox x:Name="EmployeeList" Grid.Row="0" SelectionMode="Single" VerticalAlignment="Top">
+                    <ListBox.Styles>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="Padding" Value="6" />
+                        </Style>
+                    </ListBox.Styles>
+                </ListBox>
+
+                <Button Grid.Row="1" Content="Add User" Margin="0,5,0,0" HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center" />
+                <Button Grid.Row="2" Content="Change Topic" Margin="0,2,0,0" HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center" />
+                <Button Grid.Row="3" Content="Leave Chatroom" Margin="0,2,0,0" HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center" />
+            </Grid>
+
+            <!-- Область чата -->
+            <Border Grid.Column="1" Margin="5" BorderBrush="Black" BorderThickness="1">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel x:Name="MessagesPanel" />
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <!-- Поле ввода и кнопка Send -->
+        <Grid Grid.Row="1" ColumnDefinitions="*, Auto" MaxHeight="200" MinHeight="30" VerticalAlignment="Stretch">
+            <TextBox Grid.Column="0" Margin="0,0,5,0" HorizontalAlignment="Stretch"
+                     VerticalAlignment="Stretch" AcceptsReturn="True" TextWrapping="Wrap">
+                <TextBox.Styles>
+                    <Style Selector="ScrollBar">
+                        <Setter Property="Width" Value="15" />
+                    </Style>
+                </TextBox.Styles>
+
+            </TextBox>
+            <Button Grid.Column="1" Content="Send" Background="#A0C4FF" Width="70" VerticalAlignment="Stretch"
+                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+        </Grid>
+    </Grid>
 </UserControl>

@@ -51,14 +51,16 @@ namespace ChitChatApi.Controllers
                         .ToList()
                 })
                 .FirstOrDefaultAsync();
-            
-            if (chatWithEmployees == null) return SendError("Chat not found");
-            
-            var members = chatWithEmployees.Employees.Select(e => new EmployeeDto(e.Id, e.Name, e.Username, e.Department_Id)).ToArray();
 
-            return SendData(new ChatroomResponseDto(new ChatroomDto(chatWithEmployees.Chatroom.Id, chatWithEmployees.Chatroom.Topic), members));
+            if (chatWithEmployees == null) return SendError("Chat not found");
+
+            var members = chatWithEmployees.Employees
+                .Select(e => new EmployeeDto(e.Id, e.Name, e.Username, e.Department_Id)).ToArray();
+
+            return SendData(new ChatroomResponseDto(
+                new ChatroomDto(chatWithEmployees.Chatroom.Id, chatWithEmployees.Chatroom.Topic), members));
         }
-        
+
         // Выйти из чата
         // api/chats/{CHAT_ID}/me
         [HttpDelete("{chatId:int}/me")]
@@ -67,13 +69,27 @@ namespace ChitChatApi.Controllers
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null) return SendError("Unauthorized");
 
-            var chatWithEmployees = await database.ChatMembers
+            await using var transaction = await database.Database.BeginTransactionAsync();
+
+            var deletedCount = await database.ChatMembers
                 .Where(c => c.Chatroom_Id == chatId && c.Employee_Id == userId)
                 .ExecuteDeleteAsync();
-            
-            return SendData(chatWithEmployees != 0);
+
+            // Если никого не осталось в чате, удаляем чат
+            bool hasMembers = await database.ChatMembers
+                .AnyAsync(c => c.Chatroom_Id == chatId);
+            if (!hasMembers)
+            {
+                await database.Chatrooms
+                    .Where(cr => cr.Id == chatId)
+                    .ExecuteDeleteAsync();
+            }
+
+            await transaction.CommitAsync();
+
+            return SendData(deletedCount != 0);
         }
-        
+
         // Выгнать пользователя из чата
         // api/chats/{chatId}/{employeeId}
         [HttpDelete("{chatId:int}/{employeeId:int}")]
@@ -85,7 +101,7 @@ namespace ChitChatApi.Controllers
             var chatWithEmployees = await database.ChatMembers
                 .Where(c => c.Chatroom_Id == chatId && c.Employee_Id == employeeId)
                 .ExecuteDeleteAsync();
-            
+
             return SendData(chatWithEmployees != 0);
         }
     }

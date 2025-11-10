@@ -103,7 +103,7 @@ public partial class EmployeeFinderPage : UserControl
             return;
         }
 
-        var chatWindow = new ChatWindow(createChatResponse.Data.Chatroom.Id, createChatResponse.Data.Chatroom.Topic);
+        var chatWindow = new ChatWindow(createChatResponse.Data.Chatroom.Id);
         chatWindow.Show();
 
         (VisualRoot as Window)?.Close();

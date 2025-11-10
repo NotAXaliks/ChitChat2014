@@ -7,7 +7,7 @@
 
     <Grid RowDefinitions="Auto, *">
         <!-- Список пользователей и область чата -->
-        <Grid Grid.Row="0" ColumnDefinitions="*, 2*" MaxHeight="500">
+        <Grid Grid.Row="0" ColumnDefinitions="*, 2*" Height="450">
             <!-- Список пользователей -->
             <Grid Grid.Column="0" Margin="5" RowDefinitions="*, Auto, Auto, Auto">
                 <ListBox x:Name="EmployeeList" Grid.Row="0" SelectionMode="Single" VerticalAlignment="Top" DoubleTapped="OnEmployeeSelectClick">
@@ -26,8 +26,20 @@
 
                 <Button Grid.Row="1" Content="Add User" Margin="0,5,0,0" HorizontalAlignment="Stretch"
                         HorizontalContentAlignment="Center" Click="OnAddUserClick" />
-                <Button Grid.Row="2" Content="Change Topic" Margin="0,2,0,0" HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Center" Click="OnChangeTopicClick" />
+                <Grid Grid.Row="2">
+                    <StackPanel>
+                        <!-- Кнопка Change Topic -->
+                        <Button x:Name="ChangeTopicButton" Content="Change Topic" Margin="0,2,0,0" HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center" Click="OnChangeTopicClick" />
+        
+                        <!-- Текстовое поле для изменения темы -->
+                        <TextBox x:Name="ChangeTopicTextBox" Margin="0,2,0,0"
+                                 HorizontalAlignment="Stretch" IsVisible="False"
+                                 LostFocus="OnChangeTopicTextBoxLostFocus"
+                                 KeyDown="OnChangeTopicTextBoxKeyDown"/>
+                    </StackPanel>
+                </Grid>
+                
                 <Button Grid.Row="3" Content="Leave Chatroom" Margin="0,2,0,0" HorizontalAlignment="Stretch"
                         HorizontalContentAlignment="Center" Click="OnLeaveClick"/>
             </Grid>

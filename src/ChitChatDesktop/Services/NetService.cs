@@ -51,6 +51,26 @@ public static class NetManager
             return new ApiResponse<T>(default, $"Unknown error: {e.Message}");
         }
     }
+    
+    public static async Task<ApiResponse<T>> Patch<T>(string path, object data)
+    {
+        try
+        {
+            var jsData = JsonSerializer.Serialize(data);
+            var response = await HttpClient.PatchAsync(Url + path,
+                new StringContent(jsData, Encoding.UTF8, "application/json"));
+            
+            return await GetResponse<T>(response);
+        }
+        catch (HttpRequestException e)
+        {
+            return new ApiResponse<T>(default, $"Request Error: {e.Message}");
+        }
+        catch (Exception e)
+        {
+            return new ApiResponse<T>(default, $"Unknown error: {e.Message}");
+        }
+    }
 
     public static async Task<ApiResponse<T>> Put<T>(string path, object? data = null)
     {
@@ -63,7 +83,7 @@ public static class NetManager
                 var jsData = JsonSerializer.Serialize(data);
                 response =
                     await HttpClient.PutAsync(Url + path, new StringContent(jsData, Encoding.UTF8, "application/json"));
-
+                
                 return await GetResponse<T>(response);
             }
 
@@ -101,13 +121,13 @@ public static class NetManager
 
     private static async Task<ApiResponse<T>> GetResponse<T>(HttpResponseMessage response)
     {
-        if (!response.IsSuccessStatusCode) return new ApiResponse<T>(default, response.Content.ToString());
+        if (!response.IsSuccessStatusCode) return new ApiResponse<T>(default, $"{response.ReasonPhrase} {response.Content}");
 
         var content = string.Empty;
         try
         {
             content = await response.Content.ReadAsStringAsync();
-            
+
             return JsonSerializer.Deserialize<ApiResponse<T>>(content)!;
         }
         catch (JsonException e)

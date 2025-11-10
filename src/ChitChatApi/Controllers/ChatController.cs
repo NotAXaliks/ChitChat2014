@@ -62,6 +62,32 @@ namespace ChitChatApi.Controllers
                 new ChatroomDto(chatWithEmployees.Chatroom.Id, chatWithEmployees.Chatroom.Topic), members));
         }
 
+        // Изменить чат
+        // api/chats/{CHAT_ID}
+        [HttpPatch("{chatId:int}")]
+        public async Task<IActionResult> EditChat(int chatId, [FromBody] ChatroomEditRequestDto requestDto)
+        {
+            /* Валидация */
+            if (!ModelState.IsValid) return SendError("Invalid validation");
+            /* Конец валидации */
+
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null) return SendError("Unauthorized");
+            
+            var chatroom = await database.Chatrooms.FindAsync(chatId);
+            if (chatroom == null) return SendError("Chat is not found");
+            
+            if (!(await database.ChatMembers.AnyAsync(m => m.Chatroom_Id == chatroom.Id && m.Employee_Id == userId.Value))) 
+            {
+                return SendError("You are not in this chat");
+            }
+            
+            chatroom.Topic = requestDto.Topic;
+            await database.SaveChangesAsync();
+            
+            return SendData(new ChatroomDto(chatroom.Id, chatroom.Topic));
+        }
+
         // Выйти из чата
         // api/chats/{CHAT_ID}/me
         [HttpDelete("{chatId:int}/me")]
@@ -127,7 +153,7 @@ namespace ChitChatApi.Controllers
                 .Where(e => uniqueIds.Contains(e.Id))
                 .Select(e => new EmployeeDto(e.Id, e.Name, e.Username, e.Department_Id))
                 .ToListAsync();
-            
+
             if (employees.Count < 2) return SendError("Employees is not found");
 
             var chatroomEntity = await database.Chatrooms.AddAsync(new Chatroom
@@ -140,7 +166,7 @@ namespace ChitChatApi.Controllers
             return SendData(new ChatroomResponseDto(
                 new ChatroomDto(chatroomEntity.Entity.Id, chatroomEntity.Entity.Topic),
                 employees.ToArray())
-                );
+            );
         }
 
         private async Task<bool> RemoveUserFromChat(int chatId, int userId)

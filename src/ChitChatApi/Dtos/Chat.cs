@@ -22,3 +22,10 @@ public class ChatroomCreateRequestDto
     [MaxLength(100, ErrorMessage = "Max Topic length is 100")]
     public string? Topic { get; set; }
 }
+
+public class ChatroomEditRequestDto 
+{
+    [Required(ErrorMessage = "Topic is required")]
+    [MaxLength(100, ErrorMessage = "Max Topic length is 100")]
+    public string Topic { get; set; }
+}

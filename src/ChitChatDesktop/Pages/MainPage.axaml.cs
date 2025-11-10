@@ -58,7 +58,7 @@ public partial class MainPage : UserControl
     private void OpenChat(OpenableChat chat)
     {
         // TODO: Запретить создавать несколько окон. Хранить и затем переключаться на активное окно
-        var chatWindow = new ChatWindow(chat.Id, chat.Topic);
+        var chatWindow = new ChatWindow(chat.Id);
         
         chatWindow.ChatPage.OnLeaveChat += () => Refresh();
         

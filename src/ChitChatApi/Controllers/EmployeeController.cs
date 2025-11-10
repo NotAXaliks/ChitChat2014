@@ -108,7 +108,7 @@ namespace ChitChatApi.Controllers
                 query = query.Where(e => EF.Functions.ILike(e.Name, $"%{requestDto.Query}%"));
             }
 
-            var employees = await query.Take(50).ToListAsync();
+            var employees = await query.OrderBy(e => e.Name).Take(50).ToListAsync();
             
             return SendData(employees.Select(e => new EmployeeDto(e.Id, e.Name, e.Username, e.Department_Id)));
         }

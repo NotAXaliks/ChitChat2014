@@ -5,9 +5,14 @@ namespace ChitChatDesktop;
 
 public partial class EmployeeFinderWindow : Window
 {
-    public EmployeeFinderWindow()
+    public ChatPage? ChatPage { get; }
+
+    public EmployeeFinderWindow(ChatPage? chatPage = null)
     {
         InitializeComponent();
-        EmployeeFinderFrame.Content = new EmployeeFinderPage();
+
+        ChatPage = chatPage;
+
+        EmployeeFinderFrame.Content = new EmployeeFinderPage(chatPage);
     }
 }

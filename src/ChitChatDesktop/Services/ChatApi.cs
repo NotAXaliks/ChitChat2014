@@ -19,10 +19,17 @@ public class ChatApi
         return result;
     }
     
-    public static async Task<ApiResponse<bool>> Leave(int id)
+    public static async Task<ApiResponse<bool?>> Leave(int id)
     {
-        var result = await NetManager.Delete<bool>($"chats/{id}/me");
+        var result = await NetManager.Delete<bool?>($"chats/{id}/me");
 
         return result;
     }
+    
+ public static async Task<ApiResponse<bool?>> AddEmployee(int chatId, int employeeId)
+     {
+         var result = await NetManager.Put<bool?>($"chats/{chatId}/{employeeId}");
+ 
+         return result;
+     }
 }

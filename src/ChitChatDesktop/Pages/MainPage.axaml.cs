@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using ChitChatDesktop.Dtos;
 using ChitChatDesktop.Services;
 using MsBox.Avalonia;
 
@@ -54,28 +55,10 @@ public partial class MainPage : UserControl
         }
     }
 
-    private record OpenableChat(int Id, string Topic, string LastMessageDate);
-
-    private async void OpenChat(OpenableChat chat)
+    private void OpenChat(OpenableChat chat)
     {
-        var chatResponse = await ChatApi.Get(chat.Id);
-        if (!string.IsNullOrWhiteSpace(chatResponse.Error))
-        {
-            await MessageBoxManager.GetMessageBoxStandard("Error", chatResponse.Error).ShowAsync();
-            Refresh();
-            return;
-        }
-
-        if (chatResponse.Data == null)
-        {
-            await MessageBoxManager.GetMessageBoxStandard("Error", "An error occurred while fetching the chat.")
-                .ShowAsync();
-            Refresh();
-            return;
-        }
-
         // TODO: Запретить создавать несколько окон. Хранить и затем переключаться на активное окно
-        var chatWindow = new ChatWindow(chatResponse.Data.Chatroom, chatResponse.Data.Members);
+        var chatWindow = new ChatWindow(chat);
         
         chatWindow.ChatPage.OnLeaveChat += () => Refresh();
         

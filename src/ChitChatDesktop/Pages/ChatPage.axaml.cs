@@ -5,6 +5,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using ChitChatDesktop.Dtos;
 using ChitChatDesktop.Services;
+using MsBox.Avalonia;
 
 namespace ChitChatDesktop.Pages;
 
@@ -14,23 +15,41 @@ public partial class ChatPage : UserControl
     
     public record ChatMessage(string Time, string Sender, string Text);
     
-    private readonly ChatroomDto _chat;
-    private readonly EmployeeDto[] _employees;
+    public readonly int ChatId;
+    public ChatroomDto? Chat;
+    public EmployeeDto?[] Employees;
 
-    public ChatPage(ChatroomDto chat, EmployeeDto[] employees)
+    public ChatPage(int _chatId)
     {
         InitializeComponent();
 
-        _chat = chat;
-        _employees = employees;
+        ChatId = _chatId;
 
         Refresh();
     }
 
-    private void Refresh()
+    public async void Refresh()
     {
         // Вставляем участников чата
-        EmployeeList.ItemsSource = _employees;
+        var chatResponse = await ChatApi.Get(ChatId);
+        if (!string.IsNullOrWhiteSpace(chatResponse.Error))
+        {
+            await MessageBoxManager.GetMessageBoxStandard("Error", chatResponse.Error).ShowAsync();
+            Refresh();
+            return;
+        }
+
+        if (chatResponse.Data == null)
+        {
+            await MessageBoxManager.GetMessageBoxStandard("Error", "An error occurred while fetching the chat.")
+                .ShowAsync();
+            Refresh();
+            return;
+        }
+        
+        Chat = chatResponse.Data.Chatroom;
+        Employees = chatResponse.Data.Members;
+        EmployeeList.ItemsSource = Employees;
 
         // TODO: Сделать вебсокеты. Пока что это кринж
         var chatMessages = new List<ChatMessage>
@@ -74,7 +93,9 @@ public partial class ChatPage : UserControl
 
     private void OnAddUserClick(object? sender, RoutedEventArgs e)
     {
-        Console.WriteLine("Clicked on AddUser button");
+         // TODO: Запретить создавать несколько окон. Хранить и затем переключаться на активное окно
+        var employeeFinderWindow = new EmployeeFinderWindow(this);
+        employeeFinderWindow.Show();
     }
 
     private void OnChangeTopicClick(object? sender, RoutedEventArgs e)
@@ -84,7 +105,7 @@ public partial class ChatPage : UserControl
 
     private async void OnLeaveClick(object? sender, RoutedEventArgs e)
     {
-        await ChatApi.Leave(_chat.Id);
+        await ChatApi.Leave(Chat.Id);
         
         (VisualRoot as Window)?.Close();
         

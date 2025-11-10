@@ -13,12 +13,16 @@ namespace ChitChatDesktop.Pages;
 public partial class EmployeeFinderPage : UserControl
 {
     public record DepartmentInList(int Id, string Name, bool IsChecked);
-    
+
+    private readonly ChatPage? _chatPage;
+
     private System.Timers.Timer? _debounceTimer;
 
-    public EmployeeFinderPage()
+    public EmployeeFinderPage(ChatPage? chatPage)
     {
         InitializeComponent();
+
+        _chatPage = chatPage;
 
         Refresh();
     }
@@ -66,15 +70,38 @@ public partial class EmployeeFinderPage : UserControl
         UpdateEmployees();
     }
 
+    private async void OnEmployeeSelectClick(object? sender, TappedEventArgs e)
+    {
+        var selectedItemEmployee = EmployeeList.SelectedItem;
+        if (selectedItemEmployee is not EmployeeDto employee) return;
+
+        // Если мы вызвали это окно из чата, значит просто добавляем этого работника к нам в чат
+        if (_chatPage != null)
+        {
+            var employeeAddResponse = await ChatApi.AddEmployee(_chatPage.ChatId, employee.Id);
+            if (!employeeAddResponse.IsSuccess)
+            {
+                await MessageBoxManager.GetMessageBoxStandard("Error",
+                        employeeAddResponse.Error ?? "An error occurred while adding employee.")
+                    .ShowAsync();
+                return;
+            }
+            
+            _chatPage.Refresh();
+
+            (VisualRoot as Window)?.Close();
+
+            return;
+        }
+
+        await MessageBoxManager.GetMessageBoxStandard("Error", "Soon").ShowAsync();
+    }
+
     private void OnSearchInput(object? sender, TextChangedEventArgs e)
     {
-        Console.WriteLine("Input");
         _debounceTimer?.Stop();
         _debounceTimer = new System.Timers.Timer(300) { AutoReset = false };
-        _debounceTimer.Elapsed += (_, _) =>
-        {
-            Dispatcher.UIThread.Post(UpdateEmployees);
-        };
+        _debounceTimer.Elapsed += (_, _) => { Dispatcher.UIThread.Post(UpdateEmployees); };
         _debounceTimer.Start();
     }
 }

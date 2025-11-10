@@ -31,13 +31,14 @@ public static class NetManager
             return new ApiResponse<T>(default, $"Unknown error: {e.Message}");
         }
     }
-    
+
     public static async Task<ApiResponse<T>> Post<T>(string path, object data)
     {
         try
         {
             var jsData = JsonSerializer.Serialize(data);
-            var response = await HttpClient.PostAsync(Url + path, new StringContent(jsData, Encoding.UTF8, "application/json"));
+            var response = await HttpClient.PostAsync(Url + path,
+                new StringContent(jsData, Encoding.UTF8, "application/json"));
 
             return await GetResponse<T>(response);
         }
@@ -50,7 +51,36 @@ public static class NetManager
             return new ApiResponse<T>(default, $"Unknown error: {e.Message}");
         }
     }
-    
+
+    public static async Task<ApiResponse<T>> Put<T>(string path, object? data = null)
+    {
+        try
+        {
+            HttpResponseMessage response;
+            
+            if (data != null)
+            {
+                var jsData = JsonSerializer.Serialize(data);
+                response =
+                    await HttpClient.PutAsync(Url + path, new StringContent(jsData, Encoding.UTF8, "application/json"));
+
+                return await GetResponse<T>(response);
+            }
+
+            response = await HttpClient.PutAsync(Url + path, null);
+
+            return await GetResponse<T>(response);
+        }
+        catch (HttpRequestException e)
+        {
+            return new ApiResponse<T>(default, $"Request Error: {e.Message}");
+        }
+        catch (Exception e)
+        {
+            return new ApiResponse<T>(default, $"Unknown error: {e.Message}");
+        }
+    }
+
     public static async Task<ApiResponse<T>> Delete<T>(string path)
     {
         try
@@ -77,7 +107,7 @@ public static class NetManager
         try
         {
             content = await response.Content.ReadAsStringAsync();
-
+            
             return JsonSerializer.Deserialize<ApiResponse<T>>(content)!;
         }
         catch (JsonException e)

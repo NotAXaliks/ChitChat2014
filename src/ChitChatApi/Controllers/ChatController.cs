@@ -82,28 +82,65 @@ namespace ChitChatApi.Controllers
         {
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null) return SendError("Unauthorized");
-            
-            if (!(await database.Employees.AnyAsync(e => e.Id == employeeId))) return SendError("Employee is not found");
+
+            if (!(await database.Employees.AnyAsync(e => e.Id == employeeId)))
+                return SendError("Employee is not found");
 
             var employeeAndUserInChat = await database.ChatMembers
                 .Where(m => m.Chatroom_Id == chatId && (m.Employee_Id == employeeId || m.Employee_Id == userId))
                 .Select(m => m.Employee_Id)
                 .ToListAsync();
-            
-            if (!employeeAndUserInChat.Contains(userId.Value)) 
+
+            if (!employeeAndUserInChat.Contains(userId.Value))
             {
                 return SendError("You are not in this chat.");
             }
-            if (employeeAndUserInChat.Contains(employeeId)) 
+
+            if (employeeAndUserInChat.Contains(employeeId))
             {
                 return SendError("Employee is already in this chat.");
             }
-            
+
             await database.ChatMembers
                 .AddAsync(new ChatMembers { Chatroom_Id = chatId, Employee_Id = employeeId });
             await database.SaveChangesAsync();
-            
+
             return SendData(true);
+        }
+
+        // Создать чат с пользователем
+        // api/chats/create
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateChat([FromBody] ChatroomCreateRequestDto requestDto)
+        {
+            /* Валидация */
+            if (!ModelState.IsValid) return SendError("Invalid validation");
+            /* Конец валидации */
+
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null) return SendError("Unauthorized");
+
+            var uniqueIds = requestDto.Employee_Ids.Distinct().ToList();
+            if (!uniqueIds.Contains(userId.Value)) uniqueIds.Add(userId.Value);
+
+            var employees = await database.Employees
+                .Where(e => uniqueIds.Contains(e.Id))
+                .Select(e => new EmployeeDto(e.Id, e.Name, e.Username, e.Department_Id))
+                .ToListAsync();
+            
+            if (employees.Count < 2) return SendError("Employees is not found");
+
+            var chatroomEntity = await database.Chatrooms.AddAsync(new Chatroom
+            {
+                Topic = requestDto.Topic?.Trim() ?? "New chat",
+                Members = employees.Select(e => new ChatMembers { Employee_Id = e.Id }).ToList()
+            });
+            await database.SaveChangesAsync();
+
+            return SendData(new ChatroomResponseDto(
+                new ChatroomDto(chatroomEntity.Entity.Id, chatroomEntity.Entity.Topic),
+                employees.ToArray())
+                );
         }
 
         private async Task<bool> RemoveUserFromChat(int chatId, int userId)

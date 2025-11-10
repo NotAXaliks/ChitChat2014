@@ -8,13 +8,13 @@ public partial class ChatWindow : Window
 {
     public ChatPage ChatPage { get; }
     
-    public ChatWindow(OpenableChat chat)
+    public ChatWindow(int chatId, string chatTopic)
     {
         InitializeComponent();
         
-        Title = $"Topic: {chat.Topic}";
+        Title = $"Topic: {chatTopic}";
         
-        ChatPage = new ChatPage(chat.Id);
+        ChatPage = new ChatPage(chatId);
         ChatFrame.Content = ChatPage;
     }
 }

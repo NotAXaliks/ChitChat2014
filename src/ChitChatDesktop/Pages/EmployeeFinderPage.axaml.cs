@@ -86,7 +86,7 @@ public partial class EmployeeFinderPage : UserControl
                     .ShowAsync();
                 return;
             }
-            
+
             _chatPage.Refresh();
 
             (VisualRoot as Window)?.Close();
@@ -94,7 +94,19 @@ public partial class EmployeeFinderPage : UserControl
             return;
         }
 
-        await MessageBoxManager.GetMessageBoxStandard("Error", "Soon").ShowAsync();
+        var createChatResponse = await ChatApi.CreateChat(new[] { employee.Id }, "New chat");
+        if (!createChatResponse.IsSuccess || createChatResponse.Data == null)
+        {
+            await MessageBoxManager.GetMessageBoxStandard("Error",
+                    createChatResponse.Error ?? "An error occurred while adding employee.")
+                .ShowAsync();
+            return;
+        }
+
+        var chatWindow = new ChatWindow(createChatResponse.Data.Chatroom.Id, createChatResponse.Data.Chatroom.Topic);
+        chatWindow.Show();
+
+        (VisualRoot as Window)?.Close();
     }
 
     private void OnSearchInput(object? sender, TextChangedEventArgs e)
